@@ -1,0 +1,193 @@
+You are a senior frontend engineer. Build a responsive, accessible, React + Vite + Tailwind single-page site for **Unicadia**.
+
+---
+
+## Tech Stack
+- React 18 with Vite.
+- Tailwind CSS (configured with custom brand colors).
+- TypeScript optional but preferred.
+- Frontend only — no backend. All integrations (WhatsApp form) are client-side.
+
+---
+
+## Brand
+- Colors:
+  - brand.teal: #0ED0D0
+  - brand.navy: #09304F
+  - brand.paper: #FFFFFD
+  - brand.off: #FCFDFE
+- Logo file path: `/public/assets/unicadia-logo.png` (user will upload). Use `<img>` with descriptive alt text.
+
+---
+
+## Accessibility & Quality
+- WCAG AA color contrast, semantic landmarks (header, main, footer).
+- Keyboard navigable with focus-visible styles.
+- Respect `prefers-reduced-motion`.
+- Lighthouse scores ≥90 across Performance/Accessibility/Best Practices/SEO.
+
+---
+
+## App Structure
+- Components:
+  - `Navbar`
+  - `Hero`
+  - `About`
+  - `Courses` (with `CourseCard`)
+  - `StudentLife`
+  - `Testimonials`
+  - `CTA`
+  - `ContactForm` (with WhatsApp integration)
+  - `Footer`
+- `lib/constants.ts` for nav links, courses, testimonials, student-life cards.
+- Smooth scroll for anchor navigation.
+
+---
+
+## Text Content
+- **Tagline:** “An academy where you get to experience uni life.”
+- **Hero H1:** “Experience uni life — before uni.”
+- **Hero subhead:** “Hands-on courses, mentorship, and a community that feels like campus.”
+- **Hero buttons:** Primary → “Explore Courses” (#courses). Secondary → “Learn More” (#about).
+- **About paragraph:**  
+  “Unicadia is an academy where learning feels like campus life: collaborative, project-based, and guided by mentors. Whether you’re exploring CS for the first time or leveling up for internships, we meet you where you are.”
+- **About bullets:** small cohorts • project-based learning • mentorship • career guidance.
+- **Courses:**
+  - Programming Fundamentals
+    - Outcomes: variables & types • control flow & functions • mini CLI project
+    - Link: https://google.com
+  - Object-Oriented Programming
+    - Outcomes: classes/objects • inheritance & interfaces • small library API
+    - Link: https://google.com
+  - Data Structures & Algorithms
+    - Outcomes: arrays/lists/stacks/queues • trees/graphs • sorting/searching & Big-O
+    - Link: https://google.com
+- **Student Life captions:** clubs & communities • hack nights • peer study sessions • guest lectures.
+- **Testimonials:**  
+  - “I finally ‘got’ coding because of the projects.” — Alex, Career Switcher  
+  - “Felt like a real campus—meetups and all.” — Mira, Gap-Year Student  
+- **CTA heading:** “Ready to experience uni life?”
+- **Footer one-liner:** “Unicadia — learn in a community that feels like campus.”
+
+---
+
+## WhatsApp Contact Form (Frontend Only)
+Create a `ContactForm.tsx` component with the following:
+- Fields:
+  - **Name** (text, required)
+  - **Interested courses** (checkbox group; user can select one or more)
+  - **Current highest education** (select: High School, Diploma, Undergraduate, Graduate, Other; required)
+- On submit:
+  - Validate required fields.
+  - Construct a WhatsApp message in this format:
+    ```
+    Hello Unicadia!
+    Name: <Name>
+    Interested Courses: <comma-separated list>
+    Current Highest Education: <education>
+    ```
+  - URL-encode and open:  
+    `https://wa.me/923150015497?text=<ENCODED_MESSAGE>`  
+    (Note: WhatsApp number is `923150015497` without `+`).
+- Provide fallback link:  
+  “Having trouble? Message us directly on WhatsApp” → `https://wa.me/923150015497`.
+
+### Full Snippet
+```tsx
+// src/components/ContactForm.tsx
+import { useState } from "react";
+
+export default function ContactForm() {
+  const [name, setName] = useState("");
+  const [courses, setCourses] = useState<string[]>([]);
+  const [education, setEducation] = useState("");
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!name || courses.length === 0 || !education) {
+      alert("Please fill in all required fields.");
+      return;
+    }
+
+    const message = `Hello Unicadia!%0AName: ${encodeURIComponent(
+      name
+    )}%0AInterested Courses: ${encodeURIComponent(
+      courses.join(", ")
+    )}%0ACurrent Highest Education: ${encodeURIComponent(education)}`;
+
+    const whatsappUrl = `https://wa.me/923150015497?text=${message}`;
+    window.open(whatsappUrl, "_blank");
+  };
+
+  const toggleCourse = (course: string) => {
+    setCourses(prev =>
+      prev.includes(course) ? prev.filter(c => c !== course) : [...prev, course]
+    );
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="max-w-md mx-auto space-y-4">
+      <input
+        type="text"
+        placeholder="Your Name"
+        value={name}
+        onChange={e => setName(e.target.value)}
+        className="w-full border rounded p-2"
+        required
+      />
+
+      <fieldset>
+        <legend className="font-semibold">Interested Courses</legend>
+        {[
+          "Programming Fundamentals",
+          "Object-Oriented Programming",
+          "Data Structures & Algorithms"
+        ].map(course => (
+          <label key={course} className="block">
+            <input
+              type="checkbox"
+              checked={courses.includes(course)}
+              onChange={() => toggleCourse(course)}
+              className="mr-2"
+            />
+            {course}
+          </label>
+        ))}
+      </fieldset>
+
+      <select
+        value={education}
+        onChange={e => setEducation(e.target.value)}
+        className="w-full border rounded p-2"
+        required
+      >
+        <option value="">Select Current Highest Education</option>
+        <option>High School</option>
+        <option>Diploma</option>
+        <option>Undergraduate</option>
+        <option>Graduate</option>
+        <option>Other</option>
+      </select>
+
+      <button
+        type="submit"
+        className="w-full bg-brand-teal text-white font-semibold py-2 rounded hover:bg-brand-navy"
+      >
+        Send via WhatsApp
+      </button>
+
+      <p className="text-sm text-center">
+        Having trouble?{" "}
+        <a
+          href="https://wa.me/923150015497"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-brand-teal underline"
+        >
+          Message us directly on WhatsApp
+        </a>
+      </p>
+    </form>
+  );
+}
